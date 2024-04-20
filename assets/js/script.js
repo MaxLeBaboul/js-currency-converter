@@ -1,4 +1,5 @@
 const key = "fca_live_nWQkBYVbu8KYnjGdakLYLiZDkXCm3ul67o10LW1z";
+
 const state = {
   openedDrawer: null,
   currencies: [],
@@ -13,9 +14,20 @@ const ui = {
   dismissBtn: document.getElementById("dismiss-btn"),
   currenciesList: document.getElementById("currency-list"),
   searchInput: document.getElementById("search"),
+  baseBtn: document.getElementById("base"),
+  targetBtn: document.getElementById("target"),
 };
 
-const { controls, drawer, dismissBtn, currenciesList, searchInput } = ui;
+const {
+  controls,
+  drawer,
+  dismissBtn,
+  currenciesList,
+  searchInput,
+  baseBtn,
+  targetBtn,
+} = ui;
+
 let { openedDrawer, currencies, filteredCurrencies, base, target } = state;
 
 const setupEventlisteners = () => {
@@ -23,6 +35,7 @@ const setupEventlisteners = () => {
   controls.addEventListener("click", showDrawer);
   dismissBtn.addEventListener("click", hideDrawer);
   searchInput.addEventListener("input", filterCurrency);
+  currenciesList.addEventListener("click", selectPair);
 };
 
 const initApp = () => {
@@ -53,6 +66,21 @@ const filterCurrency = (e) => {
     );
   });
   displayCurrencies();
+};
+
+const selectPair = (e) => {
+  if (e.target.getAttribute("data-code")) {
+    state[openedDrawer] = e.target.dataset.code;
+
+    [baseBtn, targetBtn].forEach((btn) => {
+      const code = state[btn.id];
+
+      btn.textContent = code;
+      btn.style.setProperty("--image", `url(${getImageURL(code)})`);
+    });
+
+    hideDrawer();
+  }
 };
 
 const displayCurrencies = () => {

@@ -210,3 +210,7 @@ button{
 .currency-list li:first-child{
   padding-block-start: 0;
 }
+
+.currency-list *:not(li){
+  pointer-events: none;
+}
