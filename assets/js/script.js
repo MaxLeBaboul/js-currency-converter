@@ -5,7 +5,8 @@ const state = {
   currencies: [],
   filteredCurrencies: [],
   base: "USD",
-  target: "EUR",
+  target: "JPY",
+  rates: {},
 };
 
 const ui = {
@@ -16,6 +17,7 @@ const ui = {
   searchInput: document.getElementById("search"),
   baseBtn: document.getElementById("base"),
   targetBtn: document.getElementById("target"),
+  exchangeRate: document.getElementById("exchange-rate"),
 };
 
 const {
@@ -26,9 +28,11 @@ const {
   searchInput,
   baseBtn,
   targetBtn,
+  exchangeRate,
 } = ui;
 
-let { openedDrawer, currencies, filteredCurrencies, base, target } = state;
+let { openedDrawer, currencies, filteredCurrencies, base, target, rates } =
+  state;
 
 const setupEventlisteners = () => {
   document.addEventListener("DOMContentLoaded", initApp);
@@ -40,6 +44,7 @@ const setupEventlisteners = () => {
 
 const initApp = () => {
   fetchCurrencies();
+  fetchExchangeRate();
 };
 
 const showDrawer = (e) => {
@@ -99,6 +104,11 @@ const displayCurrencies = () => {
     .join("");
 };
 
+const updateExchangeRate = () => {
+  const rate = rates[base][target].toFixed(4);
+  exchangeRate.textContent = ` 1 ${base} = ${rate} ${target}`;
+};
+
 const getAvailableCurrencies = () => {
   return currencies.filter(({ code }) => {
     return base !== code && target !== code;
@@ -126,6 +136,18 @@ const fetchCurrencies = () => {
       currencies = Object.values(data);
       filteredCurrencies = getAvailableCurrencies();
       displayCurrencies();
+    })
+    .catch(console.error);
+};
+
+const fetchExchangeRate = () => {
+  fetch(
+    `https://api.freecurrencyapi.com/v1/latest?apikey=${key}&base_currency=${base}`
+  )
+    .then((res) => res.json())
+    .then(({ data }) => {
+      rates[base] = data;
+      updateExchangeRate(data);
     })
     .catch(console.error);
 };
