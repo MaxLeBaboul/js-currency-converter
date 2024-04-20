@@ -152,6 +152,11 @@ button{
   font-weight: 500;
 }
 
+.exchange-rate span:empty{
+  min-width: 120px;
+  min-height: 1.5rem;
+}
+
 .drawer {
   position: absolute;
   inset: 0;
@@ -213,4 +218,26 @@ button{
 
 .currency-list *:not(li){
   pointer-events: none;
+}
+
+.skeleton {
+  position: relative;
+}
+
+.skeleton::after {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: 0.25rem;
+  content: "";
+  animation: loading 1s linear infinite alternate;
+}
+
+@keyframes loading {
+  from {
+    background: var(--loading-bg-1);
+  }
+  to {
+    background: var(--loading-bg-2);
+  }
 }
