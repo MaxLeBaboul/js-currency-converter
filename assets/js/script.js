@@ -5,8 +5,9 @@ const state = {
   currencies: [],
   filteredCurrencies: [],
   base: "USD",
-  target: "JPY",
+  target: "EUR",
   rates: {},
+  baseValue: 1,
 };
 
 const ui = {
@@ -18,6 +19,8 @@ const ui = {
   baseBtn: document.getElementById("base"),
   targetBtn: document.getElementById("target"),
   exchangeRate: document.getElementById("exchange-rate"),
+  baseInput: document.getElementById("base-input"),
+  targetInput: document.getElementById("target-input"),
 };
 
 const {
@@ -29,10 +32,19 @@ const {
   baseBtn,
   targetBtn,
   exchangeRate,
+  baseInput,
+  targetInput,
 } = ui;
 
-let { openedDrawer, currencies, filteredCurrencies, base, target, rates } =
-  state;
+let {
+  openedDrawer,
+  currencies,
+  filteredCurrencies,
+  base,
+  target,
+  rates,
+  baseValue,
+} = state;
 
 const setupEventlisteners = () => {
   document.addEventListener("DOMContentLoaded", initApp);
@@ -40,6 +52,7 @@ const setupEventlisteners = () => {
   dismissBtn.addEventListener("click", hideDrawer);
   searchInput.addEventListener("input", filterCurrency);
   currenciesList.addEventListener("click", selectPair);
+  baseInput.addEventListener("change", convertInput);
 };
 
 const initApp = () => {
@@ -77,15 +90,14 @@ const selectPair = (e) => {
   if (e.target.getAttribute("data-code")) {
     state[openedDrawer] = e.target.dataset.code;
 
-    [baseBtn, targetBtn].forEach((btn) => {
-      const code = state[btn.id];
-
-      btn.textContent = code;
-      btn.style.setProperty("--image", `url(${getImageURL(code)})`);
-    });
-
+    loadExchangeRate();
     hideDrawer();
   }
+};
+
+const convertInput = () => {
+  baseValue = parseFloat(baseInput.value) || 1;
+  loadExchangeRate();
 };
 
 const displayCurrencies = () => {
@@ -102,6 +114,28 @@ const displayCurrencies = () => {
     `;
     })
     .join("");
+};
+
+const displayConversions = () => {
+  updateButtons();
+  updateInputs();
+  updateExchangeRate();
+};
+
+const updateButtons = () => {
+  [baseBtn, targetBtn].forEach((btn) => {
+    const code = state[btn.id];
+
+    btn.textContent = code;
+    btn.style.setProperty("--image", `url(${getImageURL(code)})`);
+  });
+};
+
+const updateInputs = () => {
+  const result = baseValue * rates[base][target];
+
+  targetInput.value = result.toFixed(4);
+  baseInput.value = baseValue;
 };
 
 const updateExchangeRate = () => {
@@ -127,6 +161,14 @@ const getImageURL = (code) => {
   return flag.replace("{code}", code.toLowerCase());
 };
 
+const loadExchangeRate = () => {
+  if (typeof rates[base] !== "undefined") {
+    displayConversions();
+  } else {
+    fetchExchangeRate();
+  }
+};
+
 const fetchCurrencies = () => {
   fetch(
     `https://api.freecurrencyapi.com/v1/currencies?apikey=${key}&currencies=`
@@ -147,7 +189,7 @@ const fetchExchangeRate = () => {
     .then((res) => res.json())
     .then(({ data }) => {
       rates[base] = data;
-      updateExchangeRate(data);
+      displayConversions();
     })
     .catch(console.error);
 };
