@@ -3,6 +3,8 @@ const state = {
   openedDrawer: null,
   currencies: [],
   filteredCurrencies: [],
+  base: "USD",
+  target: "EUR",
 };
 
 const ui = {
@@ -14,7 +16,7 @@ const ui = {
 };
 
 const { controls, drawer, dismissBtn, currenciesList, searchInput } = ui;
-let { openedDrawer, currencies, filteredCurrencies } = state;
+let { openedDrawer, currencies, filteredCurrencies, base, target } = state;
 
 const setupEventlisteners = () => {
   document.addEventListener("DOMContentLoaded", initApp);
@@ -44,7 +46,7 @@ const hideDrawer = (e) => {
 
 const filterCurrency = (e) => {
   const keyword = searchInput.value.trim().toLowerCase();
-  filteredCurrencies = currencies.filter(({ code, name }) => {
+  filteredCurrencies = getAvailableCurrencies().filter(({ code, name }) => {
     return (
       code.toLowerCase().includes(keyword) ||
       name.toLowerCase().includes(keyword)
@@ -69,6 +71,12 @@ const displayCurrencies = () => {
     .join("");
 };
 
+const getAvailableCurrencies = () => {
+  return currencies.filter(({ code }) => {
+    return base !== code && target !== code;
+  });
+};
+
 const clearSearchInput = () => {
   searchInput.value = "";
   searchInput.dispatchEvent(new Event("input"));
@@ -88,7 +96,7 @@ const fetchCurrencies = () => {
     .then((res) => res.json())
     .then(({ data }) => {
       currencies = Object.values(data);
-      filteredCurrencies = currencies;
+      filteredCurrencies = getAvailableCurrencies();
       displayCurrencies();
     })
     .catch(console.error);
